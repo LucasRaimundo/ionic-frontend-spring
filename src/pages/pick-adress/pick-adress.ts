@@ -50,7 +50,7 @@ export class PickAdressPage {
 
   nextPage(item: AdressDTO){
     this.order.finalAdress = {id: item.id};
-    console.log(this.order);
+    this.navCtrl.push('PaymentPage', {order: this.order})
   }
 
 }
