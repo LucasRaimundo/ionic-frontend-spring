@@ -19,6 +19,7 @@ export class OrderConfirmationPage {
   cartItems: CartItem[];
   client: ClientDTO;
   andress: AdressDTO;
+  codOrder: string;
 
   constructor(public orderService: OrderService, public cartService: CartService, public clientService: ClientService,public navCtrl: NavController, public navParams: NavParams) {
 
@@ -54,15 +55,24 @@ export class OrderConfirmationPage {
 
   }
 
+  home(){
+    this.navCtrl.setRoot('CategoriesPage')
+  }
+
   checkout(){
     this.orderService.insert(this.order).subscribe(response =>{
       this.cartService.createOrClearCart();
-      console.log(response.headers.get('location'));
+      this.codOrder = this.extractId(response.headers.get('location'));
     }, error => {
         if (error.status == 403) {
           this.navCtrl.setRoot('HomePage');
         }
     });
+  }
+
+  private extractId(location: string): string{
+    let position = location.lastIndexOf('/');
+    return location.substring(position + 1, location.length);
   }
 
 }
