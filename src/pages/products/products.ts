@@ -14,7 +14,8 @@ import { LoadingController } from 'ionic-angular/components/loading/loading-cont
 })
 export class ProductsPage {
 
-  items : ProductDTO[];
+  items : ProductDTO[] = [];
+  page : number = 0;
 
   constructor(public loadingControl: LoadingController, public navCtrl: NavController, public navParams: NavParams, public productService : ProductService) {
   }
@@ -26,17 +27,21 @@ export class ProductsPage {
   loadData(){
     let category_id = this.navParams.get('category_id');
     let loader = this.presentLoading();
-    this.productService.findByCategory(category_id).subscribe(response => {
-      this.items = response['content'];
+    this.productService.findByCategory(category_id, this.page, 10).subscribe(response => {
+      let start  = this.items.length;
+      this.items = this.items.concat(response['content']);
+      let end = this.items.length-1;
       loader.dismiss();
-      this.loadImageUrls();
+      console.log(this.page);
+      console.log(this.items);
+      this.loadImageUrls(start, end);
     }, error => {
       loader.dismiss();
     })
   }
 
-  loadImageUrls() {
-    for (var i=0; i<this.items.length; i++) {
+  loadImageUrls(start: number, end : number) {
+    for (var i=start; i<end; i++) {
       let item = this.items[i];
       this.productService.getSmallImageFromBucket(item.id)
         .subscribe(response => {
@@ -59,9 +64,19 @@ export class ProductsPage {
   }
 
   doRefresh(refresher) {
+    this.page=0;
+    this.items = []
     this.loadData();
     setTimeout(() => {
       refresher.complete();
+    }, 1000);
+  }
+
+  doInfinite(infiniteScroll) {
+    this.page++;
+    this.loadData();
+    setTimeout(() => {
+      infiniteScroll.complete();
     }, 1000);
   }
 
